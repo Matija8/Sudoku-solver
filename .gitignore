@@ -1,0 +1,7 @@
+yarn-error.log
+/node_modules
+# Tsc outputs javascript to the /build folder.
+/build
+# Parcel keeps files in /dist and /.cache folders.
+/dist
+/.cache

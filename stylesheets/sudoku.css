@@ -1,5 +1,6 @@
 :root {
-    --cell-hover-color: bisque;
+    --cell-hover-color: lightblue;
+    --active-cell-color: lightblue;
     font-size: 10px;
 }
 
@@ -21,9 +22,13 @@
     width: 1.3em;
     height: 1.3em;
     text-align: center;
+    cursor: pointer;
 }
 
-.sudoku-cell:hover {
-    cursor: pointer;
+.sudoku-cell:hover:not(.active-cell) {
     background-color: var(--cell-hover-color);
+}
+
+.active-cell {
+    background-color: var(--active-cell-color);
 }

@@ -1,0 +1,17 @@
+{
+  "name": "sudoku-solver",
+  "version": "1.0.0",
+  "description": "A fun game of sudoku!",
+  "scripts": {
+    "build": "tsc",
+    "start": "parcel index.html"
+  },
+  "main": "build/main.js",
+  "repository": "git@github.com:Matija8/Sudoku-solver.git",
+  "author": "Matija8 <matijanme@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "parcel": "^1.12.4",
+    "typescript": "^4.0.3"
+  }
+}
