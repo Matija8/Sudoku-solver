@@ -5,3 +5,5 @@ yarn-error.log
 # Parcel keeps files in /dist and /.cache folders.
 /dist
 /.cache
+# Prevent dependabot alerts
+yarn.lock

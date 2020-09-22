@@ -10,7 +10,7 @@ A Typescript based sudoku solver.
 
 2. `$ yarn install` or `$ npm i`
 
-3. `$ yarn run build` or `$ npm run build` or just `$ tsc`
+3. `$ yarn build` or `$ npm run build` or just `$ tsc`
 
 4. `$ yarn start` or `$ npm start`
 
