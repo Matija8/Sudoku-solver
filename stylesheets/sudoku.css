@@ -4,9 +4,17 @@
     font-size: 10px;
 }
 
+.sudoku-DOM {
+    width: 300px;
+    /* border: 1px solid black; */
+    margin: auto;
+    padding: 40px;
+}
+
 .sudoku-table {
     display: table;
     margin: auto;
+    margin-bottom: 20px;
 }
 
 .sudoku-row {
@@ -19,9 +27,10 @@
     border: 0.05em solid black;
     padding: 0.3em;
     margin: auto;
-    width: 1.3em;
-    height: 1.3em;
+    width: 2rem;
+    height: 2rem;
     text-align: center;
+    vertical-align: middle;
     cursor: pointer;
 }
 

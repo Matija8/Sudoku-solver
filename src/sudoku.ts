@@ -24,6 +24,10 @@ export class Sudoku {
     this.matrix = [];
     this.DOMmatrix = [];
     this.activeCell = { row: null, col: null };
+
+    const sudokuDOM = document.createElement('div');
+    sudokuDOM.classList.add('sudoku-DOM');
+
     const sudokuTable = document.createElement('div');
     sudokuTable.classList.add('sudoku-table');
 
@@ -54,7 +58,29 @@ export class Sudoku {
     if (!readOnly) {
       this.addKeyPressListener();
     }
-    root.appendChild(sudokuTable);
+    sudokuDOM.appendChild(sudokuTable);
+
+    const checkArea = document.createElement('div');
+    const checkBtn = document.createElement('button');
+    checkBtn.innerHTML = 'Check'
+    // TODO: add logic.
+    const checkText = document.createElement('p');
+    checkText.innerHTML = 'Fine here!';
+    checkArea.appendChild(checkBtn);
+    checkArea.appendChild(checkText);
+
+    sudokuDOM.appendChild(checkArea);
+
+    const solveArea = document.createElement('div');
+    const solveBtn = document.createElement('button');
+    solveBtn.innerHTML = 'Solve'
+    const solveText = document.createElement('p');
+    solveArea.appendChild(solveBtn);
+    solveArea.appendChild(solveText);
+
+    sudokuDOM.appendChild(solveBtn);
+
+    root.appendChild(sudokuDOM);
   }
 
 
