@@ -1,11 +1,12 @@
 :root {
     --cell-hover-color: lightblue;
-    --active-cell-color: lightblue;
+    --active-cell-color: rgb(125, 205, 230);
+    --active-row-color: rgb(200, 225, 230);
     font-size: 10px;
 }
 
 .sudoku-DOM {
-    width: 300px;
+    width: 400px;
     /* border: 1px solid black; */
     margin: auto;
     padding: 40px;
@@ -27,8 +28,8 @@
     border: 0.05em solid black;
     padding: 0.3em;
     margin: auto;
-    width: 2rem;
-    height: 2rem;
+    width: 3rem;
+    height: 3rem;
     text-align: center;
     vertical-align: middle;
     cursor: pointer;
@@ -39,5 +40,9 @@
 }
 
 .active-cell {
+    background-color: var(--active-cell-color);
+}
+
+.active-row-cell:not(.active-cell) {
     background-color: var(--active-cell-color);
 }

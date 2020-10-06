@@ -2,9 +2,9 @@
 export type SudokuValue = null | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
 
-interface ActiveCell {
-  row: number | null;
-  col: number | null;
+interface Cell {
+  row: number;
+  col: number;
 }
 
 
@@ -17,17 +17,18 @@ export class Sudoku {
 
   private matrix: SudokuValue[][];
   private DOMmatrix: HTMLElement[][];
-  private readonly activeCell: ActiveCell;
+  private activeCell: Cell | null;
 
 
   constructor(root: HTMLElement, readOnly = true) {
     this.matrix = [];
     this.DOMmatrix = [];
-    this.activeCell = { row: null, col: null };
+    this.activeCell = null;
 
     const sudokuDOM = document.createElement('div');
     sudokuDOM.classList.add('sudoku-DOM');
 
+    // Table.
     const sudokuTable = document.createElement('div');
     sudokuTable.classList.add('sudoku-table');
 
@@ -58,7 +59,9 @@ export class Sudoku {
     if (!readOnly) {
       this.addKeyPressListener();
     }
+
     sudokuDOM.appendChild(sudokuTable);
+
 
     const checkArea = document.createElement('div');
     const checkBtn = document.createElement('button');
@@ -71,6 +74,7 @@ export class Sudoku {
 
     sudokuDOM.appendChild(checkArea);
 
+
     const solveArea = document.createElement('div');
     const solveBtn = document.createElement('button');
     solveBtn.innerHTML = 'Solve'
@@ -79,6 +83,7 @@ export class Sudoku {
     solveArea.appendChild(solveText);
 
     sudokuDOM.appendChild(solveBtn);
+
 
     root.appendChild(sudokuDOM);
   }
@@ -95,11 +100,11 @@ export class Sudoku {
 
 
   private get activeCellDOM(): HTMLElement | null {
-    const {row, col} = this.activeCell;
-    if (row !== null && col !== null) {
-      return this.DOMmatrix[row][col];
+    if (this.activeCell === null) {
+      return null;
     }
-    return null;
+    const {row, col} = this.activeCell;
+    return this.DOMmatrix[row][col];
   }
 
 
@@ -108,8 +113,7 @@ export class Sudoku {
       return;
     }
     this.dropActiveCell();
-    this.activeCell.row = row;
-    this.activeCell.col = col;
+    this.activeCell = {row, col};
     const cell = this.activeCellDOM;
     if (cell !== null) {
       cell.classList.add('active-cell');
@@ -122,8 +126,26 @@ export class Sudoku {
     if (cell !== null) {
       cell.classList.remove('active-cell');
     }
-    this.activeCell.row = null;
-    this.activeCell.col = null;
+    this.activeCell = null;
+  }
+
+
+  private setCellValue(row: number, col: number, val: SudokuValue) {
+    // TODO: assert row/col.
+    // TODO: Add readonly cells!
+    const DOMText = val === null ? '' : String(val)
+    this.DOMmatrix[row][col].innerText = DOMText;
+    this.matrix[row][col] = val;
+  }
+
+
+  private getActiveRowDOM() {
+    // TODO
+  }
+
+
+  private getActiveColDOM() {
+    // TODO
   }
 
 
@@ -135,28 +157,39 @@ export class Sudoku {
     cell.addEventListener('click', () => {
       this.setActiveCell(row, col);
     });
-    cell.addEventListener('blur', () => {
+    /* cell.addEventListener('blur', () => {
       this.dropActiveCell();
-    });
+    }); */
   }
 
 
   private addKeyPressListener = () => {
-    document.addEventListener('keypress', event => {
+    document.addEventListener('keydown', event => {
+      // Non-cell keypresses.
       if (event.key === 'Enter') {
         console.log('TODO: Enter?');
       }
 
-      const {row, col} = this.activeCell;
-
-      if (event.key === 'Esc' && row !== null && col !== null) {
-
+      if (this.activeCell === null) {
+        return;
+      }
+      // Cell keypresses.
+      const { row, col } = this.activeCell;
+      const setActiveCellValue = (val: SudokuValue): void => {
+        this.setCellValue(row, col, val);
       }
 
-      const n = parseInt(event.key);
-      if (isSudokuValue(n) && row !== null && col !== null) {
-        this.DOMmatrix[row][col].innerText = String(n);
-        this.matrix[row][col] = n;
+      if (event.key === 'Escape') {
+        this.dropActiveCell();
+      }
+
+      if (['Backspace', 'Delete', 'x'].includes(event.key)) {
+        setActiveCellValue(null);
+      }
+
+      const val = parseInt(event.key);
+      if (isSudokuValue(val)) {
+        setActiveCellValue(val);
       }
     });
   }
