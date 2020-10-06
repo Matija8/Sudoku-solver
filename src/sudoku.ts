@@ -21,71 +21,21 @@ export class Sudoku {
 
 
   constructor(root: HTMLElement, readOnly = true) {
-    this.matrix = [];
+    this.matrix = Sudoku.createMatrix();
     this.DOMmatrix = [];
     this.activeCell = null;
 
-    const sudokuDOM = document.createElement('div');
-    sudokuDOM.classList.add('sudoku-DOM');
+    const { DOMmatrix, sudokuDOM } = Sudoku.createDOM();
+    root.appendChild(sudokuDOM);
 
-    // Table.
-    const sudokuTable = document.createElement('div');
-    sudokuTable.classList.add('sudoku-table');
-
-    for (let i = 0; i < 9; i++) {
-      // Rows.
-      const sudokuRow = document.createElement('div');
-      sudokuRow.classList.add('sudoku-row');
-      sudokuTable.appendChild(sudokuRow);
-
-      this.matrix[i] = [];
-      this.DOMmatrix[i] = [];
-
-      for (let j = 0; j < 9; j++) {
-        // Cells.
-        const sudokuCell = document.createElement('div');
-        sudokuCell.classList.add('sudoku-cell');
-        sudokuCell.setAttribute('tabindex', '-1');
-        sudokuRow.appendChild(sudokuCell);
-        this.DOMmatrix[i][j] = sudokuCell;
-        this.matrix[i][j] = null;
-
-        if (!readOnly) {
-          this.addCellClickListener(i, j, sudokuCell);
-        }
-
+    for (let row = 0; row < 9; row++) {
+      for (let col = 0; col < 9; col++) {
+        this.addCellClickListener(row, col, DOMmatrix[row][col]);
       }
     }
-    if (!readOnly) {
-      this.addKeyPressListener();
-    }
+    this.DOMmatrix = DOMmatrix;
 
-    sudokuDOM.appendChild(sudokuTable);
-
-
-    const checkArea = document.createElement('div');
-    const checkBtn = document.createElement('button');
-    checkBtn.innerHTML = 'Check'
-    // TODO: add logic.
-    const checkText = document.createElement('p');
-    checkText.innerHTML = 'Fine here!';
-    checkArea.appendChild(checkBtn);
-    checkArea.appendChild(checkText);
-
-    sudokuDOM.appendChild(checkArea);
-
-
-    const solveArea = document.createElement('div');
-    const solveBtn = document.createElement('button');
-    solveBtn.innerHTML = 'Solve'
-    const solveText = document.createElement('p');
-    solveArea.appendChild(solveBtn);
-    solveArea.appendChild(solveText);
-
-    sudokuDOM.appendChild(solveBtn);
-
-
-    root.appendChild(sudokuDOM);
+    this.addKeyPressListeners();
   }
 
 
@@ -103,17 +53,17 @@ export class Sudoku {
     if (this.activeCell === null) {
       return null;
     }
-    const {row, col} = this.activeCell;
+    const { row, col } = this.activeCell;
     return this.DOMmatrix[row][col];
   }
 
 
   private setActiveCell(row: number, col: number): void {
-    if ({row, col} === this.activeCell) {
+    if ({ row, col } === this.activeCell) {
       return;
     }
     this.dropActiveCell();
-    this.activeCell = {row, col};
+    this.activeCell = { row, col };
     const cell = this.activeCellDOM;
     if (cell !== null) {
       cell.classList.add('active-cell');
@@ -136,6 +86,10 @@ export class Sudoku {
     const DOMText = val === null ? '' : String(val)
     this.DOMmatrix[row][col].innerText = DOMText;
     this.matrix[row][col] = val;
+  }
+
+  private getCellValue(row: number, col: number): SudokuValue {
+    return this.matrix[row][col];
   }
 
 
@@ -163,7 +117,7 @@ export class Sudoku {
   }
 
 
-  private addKeyPressListener = () => {
+  private addKeyPressListeners = () => {
     document.addEventListener('keydown', event => {
       // Non-cell keypresses.
       if (event.key === 'Enter') {
@@ -192,6 +146,78 @@ export class Sudoku {
         setActiveCellValue(val);
       }
     });
+  }
+
+
+  private static createMatrix(): SudokuValue[][] {
+    const matrix: SudokuValue[][] = [];
+    for (let i = 0; i < 9; i++) {
+      matrix[i] = [];
+      for (let j = 0; j < 9; j++) {
+        matrix[i][j] = null;
+      }
+    }
+    return matrix;
+  }
+
+
+  private static createDOM(): {
+    DOMmatrix: HTMLElement[][],
+    sudokuDOM: HTMLElement,
+  } {
+    const DOMmatrix: HTMLElement[][] = [];
+
+    const sudokuDOM = document.createElement('div');
+    sudokuDOM.classList.add('sudoku-DOM');
+
+    // Table-start.
+    const sudokuTable = document.createElement('div');
+    sudokuTable.classList.add('sudoku-table');
+
+    for (let i = 0; i < 9; i++) {
+      // Rows.
+      const sudokuRow = document.createElement('div');
+      sudokuRow.classList.add('sudoku-row');
+      sudokuTable.appendChild(sudokuRow);
+      DOMmatrix[i] = [];
+
+      for (let j = 0; j < 9; j++) {
+        // Cells.
+        const sudokuCell = document.createElement('div');
+        sudokuCell.classList.add('sudoku-cell');
+        sudokuCell.setAttribute('tabindex', '-1');
+        sudokuRow.appendChild(sudokuCell);
+        DOMmatrix[i][j] = sudokuCell;
+      }
+    }
+    sudokuDOM.appendChild(sudokuTable);
+    // Table-end.
+
+
+    // Check-area-start.
+    const checkArea = document.createElement('div');
+    const checkBtn = document.createElement('button');
+    checkBtn.innerHTML = 'Check'
+    // TODO: add logic.
+    const checkText = document.createElement('p');
+    checkText.innerHTML = 'Fine here!';
+    checkArea.appendChild(checkBtn);
+    checkArea.appendChild(checkText);
+    sudokuDOM.appendChild(checkArea);
+    // Check-area-end.
+
+
+    // Solve-area-start.
+    const solveArea = document.createElement('div');
+    const solveBtn = document.createElement('button');
+    solveBtn.innerHTML = 'Solve'
+    const solveText = document.createElement('p');
+    solveArea.appendChild(solveBtn);
+    solveArea.appendChild(solveText);
+    sudokuDOM.appendChild(solveBtn);
+    // Solve-area-end.
+
+    return { DOMmatrix, sudokuDOM };
   }
 
 
