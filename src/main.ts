@@ -1,4 +1,4 @@
-import { Sudoku } from './sudoku';
+import { Sudoku } from './Controller/sudoku';
 
 
 const main = function appendSudokuGameToRoot(rootId = 'root') {

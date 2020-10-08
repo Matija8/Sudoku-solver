@@ -1,23 +1,12 @@
-
-export type SudokuValue = null | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
-
-
-interface Cell {
-  row: number;
-  col: number;
-}
-
-
-function isSudokuValue(n: number | null): n is SudokuValue {
-  return [null, 1, 2, 3, 4, 5, 6, 7, 8, 9].includes(n);
-}
+import { CellCoords, SudokuCellValue, isSudokuValue } from '../Model/sudokuCell';
+import { createDOM } from '../View/sudokuView';
 
 
 export class Sudoku {
 
-  private matrix: SudokuValue[][];
+  private matrix: SudokuCellValue[][];
   private DOMmatrix: HTMLElement[][];
-  private activeCell: Cell | null;
+  private activeCell: CellCoords | null;
 
 
   constructor(root: HTMLElement, readOnly = true) {
@@ -25,7 +14,7 @@ export class Sudoku {
     this.DOMmatrix = [];
     this.activeCell = null;
 
-    const { DOMmatrix, sudokuDOM } = Sudoku.createDOM();
+    const { DOMmatrix, sudokuDOM } = createDOM();
     root.appendChild(sudokuDOM);
 
     for (let row = 0; row < 9; row++) {
@@ -80,15 +69,28 @@ export class Sudoku {
   }
 
 
-  private setCellValue(row: number, col: number, val: SudokuValue) {
-    // TODO: assert row/col.
-    // TODO: Add readonly cells!
-    const DOMText = val === null ? '' : String(val)
-    this.DOMmatrix[row][col].innerText = DOMText;
-    this.matrix[row][col] = val;
+  private isReadOnlyCell(row: number, col: number) {
+    return false;
   }
 
-  private getCellValue(row: number, col: number): SudokuValue {
+
+  private setCellValue(row: number, col: number, val: SudokuCellValue) {
+    // TODO: assert row/col.
+    // TODO: Add readonly cells!
+    if (this.isReadOnlyCell(row, col)) {
+      return;
+    }
+    const prevVal = this.matrix[row][col];
+    if (val === prevVal) {
+      return;
+    }
+
+    this.matrix[row][col] = val;
+    const DOMText = val === null ? '' : String(val)
+    this.DOMmatrix[row][col].innerText = DOMText;
+  }
+
+  private getCellValue(row: number, col: number): SudokuCellValue {
     return this.matrix[row][col];
   }
 
@@ -100,6 +102,40 @@ export class Sudoku {
 
   private getActiveColDOM() {
     // TODO
+  }
+
+
+  private checkRow(row: number) {
+    console.assert(0 < row && row <= 9, 'Row number is invalid.')
+    const repeated = new Set<number>();
+    const vals = new Set<number>();
+    for (const val of this.matrix[row]) {
+      if (val === null) {
+        continue;
+      }
+      if (vals.has(val)) {
+        repeated.add(val);
+      }
+      vals.add(val);
+    }
+    return repeated;
+  }
+
+  private checkCol(col: number) {
+    // Check if there are no duplicates in col {col}.
+    console.assert(0 < col && col <= 9, 'Col number is invalid.')
+    const vals = new Set<number>()
+    for (let row = 0; row < 9; row++) {
+      const val = this.matrix[row][col];
+      if (val === null) {
+        continue;
+      }
+      if (vals.has(val)) {
+        return false;
+      }
+      vals.add(val);
+    }
+    return true;
   }
 
 
@@ -129,7 +165,7 @@ export class Sudoku {
       }
       // Cell keypresses.
       const { row, col } = this.activeCell;
-      const setActiveCellValue = (val: SudokuValue): void => {
+      const setActiveCellValue = (val: SudokuCellValue): void => {
         this.setCellValue(row, col, val);
       }
 
@@ -149,8 +185,8 @@ export class Sudoku {
   }
 
 
-  private static createMatrix(): SudokuValue[][] {
-    const matrix: SudokuValue[][] = [];
+  private static createMatrix(): SudokuCellValue[][] {
+    const matrix: SudokuCellValue[][] = [];
     for (let i = 0; i < 9; i++) {
       matrix[i] = [];
       for (let j = 0; j < 9; j++) {
@@ -159,66 +195,5 @@ export class Sudoku {
     }
     return matrix;
   }
-
-
-  private static createDOM(): {
-    DOMmatrix: HTMLElement[][],
-    sudokuDOM: HTMLElement,
-  } {
-    const DOMmatrix: HTMLElement[][] = [];
-
-    const sudokuDOM = document.createElement('div');
-    sudokuDOM.classList.add('sudoku-DOM');
-
-    // Table-start.
-    const sudokuTable = document.createElement('div');
-    sudokuTable.classList.add('sudoku-table');
-
-    for (let i = 0; i < 9; i++) {
-      // Rows.
-      const sudokuRow = document.createElement('div');
-      sudokuRow.classList.add('sudoku-row');
-      sudokuTable.appendChild(sudokuRow);
-      DOMmatrix[i] = [];
-
-      for (let j = 0; j < 9; j++) {
-        // Cells.
-        const sudokuCell = document.createElement('div');
-        sudokuCell.classList.add('sudoku-cell');
-        sudokuCell.setAttribute('tabindex', '-1');
-        sudokuRow.appendChild(sudokuCell);
-        DOMmatrix[i][j] = sudokuCell;
-      }
-    }
-    sudokuDOM.appendChild(sudokuTable);
-    // Table-end.
-
-
-    // Check-area-start.
-    const checkArea = document.createElement('div');
-    const checkBtn = document.createElement('button');
-    checkBtn.innerHTML = 'Check'
-    // TODO: add logic.
-    const checkText = document.createElement('p');
-    checkText.innerHTML = 'Fine here!';
-    checkArea.appendChild(checkBtn);
-    checkArea.appendChild(checkText);
-    sudokuDOM.appendChild(checkArea);
-    // Check-area-end.
-
-
-    // Solve-area-start.
-    const solveArea = document.createElement('div');
-    const solveBtn = document.createElement('button');
-    solveBtn.innerHTML = 'Solve'
-    const solveText = document.createElement('p');
-    solveArea.appendChild(solveBtn);
-    solveArea.appendChild(solveText);
-    sudokuDOM.appendChild(solveBtn);
-    // Solve-area-end.
-
-    return { DOMmatrix, sudokuDOM };
-  }
-
 
 }

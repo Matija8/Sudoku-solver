@@ -16,6 +16,7 @@
     display: table;
     margin: auto;
     margin-bottom: 20px;
+    border: 0.1em solid black;
 }
 
 .sudoku-row {
@@ -25,7 +26,8 @@
 .sudoku-cell {
     font-size: 2rem;
     display: table-cell;
-    border: 0.05em solid black;
+    border-left: 0.05em solid gray;
+    border-top: 0.05em solid gray;
     padding: 0.3em;
     margin: auto;
     width: 3rem;
@@ -37,6 +39,19 @@
 
 .sudoku-cell:hover:not(.active-cell) {
     background-color: var(--cell-hover-color);
+}
+
+.sudoku-cell.strong-border-left {
+    border-left: 0.1em solid black;
+}
+.sudoku-cell.strong-border-right {
+    border-right: 0.1em solid black;
+}
+.sudoku-cell.strong-border-above {
+    border-top: 0.1em solid black;
+}
+.sudoku-cell.strong-border-below {
+    border-bottom: 0.1em solid black;
 }
 
 .active-cell {

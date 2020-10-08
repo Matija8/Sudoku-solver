@@ -4,6 +4,7 @@
   "description": "A fun game of sudoku!",
   "scripts": {
     "build": "tsc",
+    "watch-ts": "tsc -w",
     "start": "parcel index.html"
   },
   "main": "build/main.js",
