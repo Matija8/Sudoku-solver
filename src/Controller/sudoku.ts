@@ -1,20 +1,23 @@
-import { CellCoords, SudokuCellValue, isSudokuValue } from '../Model/sudokuCell';
+import {
+  CellCoords,
+  SudokuCellValue,
+  isSudokuValue,
+  SudokuCell,
+} from '../Model/sudokuCell';
 import { createDOM } from '../View/sudokuView';
 
 
 export class Sudoku {
 
-  private matrix: SudokuCellValue[][];
-  private DOMmatrix: HTMLElement[][];
-  private activeCell: CellCoords | null;
+  private matrix: SudokuCell[][];
+  private _activeCell: SudokuCell | null;
 
 
   constructor(root: HTMLElement, readOnly = true) {
-    this.matrix = Sudoku.createMatrix();
-    this.DOMmatrix = [];
-    this.activeCell = null;
+    this._activeCell = null;
 
     const { DOMmatrix, sudokuDOM } = createDOM();
+    this.matrix = Sudoku.createMatrix(DOMmatrix);
     root.appendChild(sudokuDOM);
 
     for (let row = 0; row < 9; row++) {
@@ -22,9 +25,27 @@ export class Sudoku {
         this.addCellClickListener(row, col, DOMmatrix[row][col]);
       }
     }
-    this.DOMmatrix = DOMmatrix;
 
     this.addKeyPressListeners();
+  }
+
+
+  private get activeCell(): SudokuCell | null {
+    return this._activeCell;
+  }
+
+
+  private set activeCell(newActiveCell: SudokuCell | null) {
+    if (this._activeCell === newActiveCell) {
+      return;
+    }
+    if (this._activeCell) {
+      this._activeCell.isActive = false;
+    }
+    if (newActiveCell) {
+      newActiveCell.isActive = true;
+    }
+    this._activeCell = newActiveCell;
   }
 
 
@@ -32,84 +53,60 @@ export class Sudoku {
     // Return copy of the sudoku matrix.
     const newMatrix = [];
     for (let i = 0; i < this.matrix.length; i++) {
-      newMatrix[i] = this.matrix[i].slice();
+      newMatrix[i] = this.matrix[i].map(cell => cell.val);
     }
     return newMatrix;
   }
 
-
-  private get activeCellDOM(): HTMLElement | null {
-    if (this.activeCell === null) {
-      return null;
-    }
-    const { row, col } = this.activeCell;
-    return this.DOMmatrix[row][col];
-  }
-
-
-  private setActiveCell(row: number, col: number): void {
-    if ({ row, col } === this.activeCell) {
-      return;
-    }
-    this.dropActiveCell();
-    this.activeCell = { row, col };
-    const cell = this.activeCellDOM;
-    if (cell !== null) {
-      cell.classList.add('active-cell');
-    }
-  }
-
-
-  private dropActiveCell(): void {
-    const cell = this.activeCellDOM;
-    if (cell !== null) {
-      cell.classList.remove('active-cell');
-    }
-    this.activeCell = null;
-  }
-
-
-  private isReadOnlyCell(row: number, col: number) {
-    return false;
-  }
-
-
-  private setCellValue(row: number, col: number, val: SudokuCellValue) {
-    // TODO: assert row/col.
-    // TODO: Add readonly cells!
-    if (this.isReadOnlyCell(row, col)) {
-      return;
-    }
-    const prevVal = this.matrix[row][col];
-    if (val === prevVal) {
-      return;
-    }
-
-    this.matrix[row][col] = val;
-    const DOMText = val === null ? '' : String(val)
-    this.DOMmatrix[row][col].innerText = DOMText;
-  }
-
-  private getCellValue(row: number, col: number): SudokuCellValue {
+  private getCell(row: number, col: number): SudokuCell {
     return this.matrix[row][col];
   }
 
 
-  private getActiveRowDOM() {
-    // TODO
+  private setActiveCell(row: number, col: number): void {
+    const newActiveCell = this.getCell(row, col);
+    if (!newActiveCell) {
+      return;
+    }
+    if (this.activeCell === newActiveCell) {
+      return;
+    }
+    this.activeCell = newActiveCell;
   }
 
 
-  private getActiveColDOM() {
-    // TODO
+  private dropActiveCell(): void {
+    this.activeCell = null;
   }
 
 
-  private checkRow(row: number) {
+  private setActiveCellValue(val: SudokuCellValue) {
+    if (!this.activeCell) {
+      return;
+    }
+    this.activeCell.val = val;
+  }
+
+
+  ValidateCells() {
+    // Given an array of cells, mark duplicates
+  }
+
+  markCell(cell: HTMLElement, valid = false) {
+    if (valid) {
+      cell.classList.remove('invalid-cell');
+    } else {
+      cell.classList.add('invalid-cell');
+    }
+  }
+
+
+  private checkRow(row: number): Set<number> {
+    // Return duplicate numbers in row {row}.
     console.assert(0 < row && row <= 9, 'Row number is invalid.')
     const repeated = new Set<number>();
     const vals = new Set<number>();
-    for (const val of this.matrix[row]) {
+    for (const val of this.matrix[row].map(cell => cell.val)) {
       if (val === null) {
         continue;
       }
@@ -121,21 +118,22 @@ export class Sudoku {
     return repeated;
   }
 
-  private checkCol(col: number) {
-    // Check if there are no duplicates in col {col}.
+  private checkCol(col: number): Set<number> {
+    // Return duplicate numbers in col {col}.
     console.assert(0 < col && col <= 9, 'Col number is invalid.')
+    const repeated = new Set<number>();
     const vals = new Set<number>()
     for (let row = 0; row < 9; row++) {
-      const val = this.matrix[row][col];
+      const val = this.matrix[row][col].val;
       if (val === null) {
         continue;
       }
       if (vals.has(val)) {
-        return false;
+        repeated.add(val);
       }
       vals.add(val);
     }
-    return true;
+    return repeated;
   }
 
 
@@ -164,33 +162,29 @@ export class Sudoku {
         return;
       }
       // Cell keypresses.
-      const { row, col } = this.activeCell;
-      const setActiveCellValue = (val: SudokuCellValue): void => {
-        this.setCellValue(row, col, val);
-      }
 
       if (event.key === 'Escape') {
         this.dropActiveCell();
       }
 
-      if (['Backspace', 'Delete', 'x'].includes(event.key)) {
-        setActiveCellValue(null);
+      if (['Backspace', 'Delete', 'x'/*, 'd'*/].includes(event.key)) {
+        this.setActiveCellValue(null);
       }
 
       const val = parseInt(event.key);
       if (isSudokuValue(val)) {
-        setActiveCellValue(val);
+        this.setActiveCellValue(val);
       }
     });
   }
 
 
-  private static createMatrix(): SudokuCellValue[][] {
-    const matrix: SudokuCellValue[][] = [];
+  private static createMatrix(DOMMatrix: HTMLElement[][]): SudokuCell[][] {
+    const matrix: SudokuCell[][] = [];
     for (let i = 0; i < 9; i++) {
       matrix[i] = [];
       for (let j = 0; j < 9; j++) {
-        matrix[i][j] = null;
+        matrix[i][j] = new SudokuCell({ DOMElement: DOMMatrix[i][j] });
       }
     }
     return matrix;

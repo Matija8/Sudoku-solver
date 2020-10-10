@@ -54,6 +54,10 @@
     border-bottom: 0.1em solid black;
 }
 
+.sudoku-cell.invalid-cell {
+    color: red;
+}
+
 .active-cell {
     background-color: var(--active-cell-color);
 }
