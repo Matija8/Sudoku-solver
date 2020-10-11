@@ -40,6 +40,7 @@ export const createDOM = function createSudokuDOMView(): {
   const checkArea = document.createElement('div');
   const checkBtn = document.createElement('button');
   checkBtn.innerHTML = 'Check'
+  checkBtn.classList.add('button', 'button-primary')
   // TODO: add logic.
   const checkText = document.createElement('p');
   checkText.innerHTML = 'Fine here!';
@@ -52,6 +53,7 @@ export const createDOM = function createSudokuDOMView(): {
   // Solve-area-start.
   const solveArea = document.createElement('div');
   const solveBtn = document.createElement('button');
+  solveBtn.classList.add('button', 'button-danger')
   solveBtn.innerHTML = 'Solve'
   const solveText = document.createElement('p');
   solveArea.appendChild(solveBtn);
