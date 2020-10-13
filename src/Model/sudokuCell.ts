@@ -1,13 +1,10 @@
-
 export type SudokuCellValue = null | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
-
 
 export const isSudokuValue = function isValidSudokuCellValue(
   n: number | null
 ): n is SudokuCellValue {
   return [null, 1, 2, 3, 4, 5, 6, 7, 8, 9].includes(n);
-}
-
+};
 
 export interface CellCoords {
   row: number;
@@ -22,9 +19,13 @@ export class SudokuCell {
   private _isActive: boolean;
 
   constructor({
-    readOnly = false, val = null, DOMElement
+    readOnly = false,
+    val = null,
+    DOMElement,
   }: {
-    readOnly?: boolean, val?: SudokuCellValue, DOMElement: HTMLElement
+    readOnly?: boolean;
+    val?: SudokuCellValue;
+    DOMElement: HTMLElement;
   }) {
     this._isCorrect = true;
     this._val = val;
@@ -33,7 +34,6 @@ export class SudokuCell {
     this._DOMElement = DOMElement;
     this._isActive = false;
   }
-
 
   public get isCorrect(): boolean {
     return this._isCorrect;
@@ -51,7 +51,6 @@ export class SudokuCell {
     }
   }
 
-
   public set isActive(active: boolean) {
     if (active === this._isActive) {
       return;
@@ -63,7 +62,6 @@ export class SudokuCell {
       this._DOMElement.classList.remove('active-cell');
     }
   }
-
 
   public get val() {
     return this._val;
@@ -77,5 +75,4 @@ export class SudokuCell {
     const DOMText = newVal === null ? '' : String(newVal);
     this._DOMElement.innerHTML = DOMText;
   }
-
 }
