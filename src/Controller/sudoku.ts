@@ -9,12 +9,14 @@ import { createDOM } from '../View/sudokuView';
 export class Sudoku {
   private matrix: SudokuCell[][];
   private _activeCell: SudokuCell | null;
+  private sudokuDOM: HTMLElement;
 
   constructor(root: HTMLElement, readOnly = true) {
     this._activeCell = null;
 
-    const { DOMmatrix, sudokuDOM } = createDOM();
+    const { DOMmatrix, sudokuDOM, checkBtn } = createDOM();
     this.matrix = Sudoku.createMatrix(DOMmatrix);
+    this.sudokuDOM = sudokuDOM;
     root.appendChild(sudokuDOM);
 
     for (let row = 0; row < 9; row++) {
@@ -23,7 +25,18 @@ export class Sudoku {
       }
     }
 
+    // TODO remove listener on close.
+    const clickFunc = () => {
+      this.invalidCells();
+    }
+    checkBtn.addEventListener('click', clickFunc);
+
     this.addKeyPressListeners();
+
+
+    sudokuDOM.addEventListener('blur', () => {
+      this.dropActiveCell();
+    });
   }
 
   private get activeCell(): SudokuCell | null {
@@ -78,13 +91,34 @@ export class Sudoku {
     this.activeCell.val = val;
   }
 
-  private ValidateCells() {
+  private invalidCells(): Set<SudokuCell> {
     const invalidCells = new Set<SudokuCell>();
     for (let i = 0; i < 9; i++) {
       for (const cell of this.checkRow(i)) {
         invalidCells.add(cell);
       }
+      for (const cell of this.checkCol(i)) {
+        invalidCells.add(cell);
+      }
     }
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        for (const cell of this.checkSquare(i, j)) {
+          invalidCells.add(cell);
+        }
+      }
+    }
+    return invalidCells;
+  }
+
+  private getCells() {
+    const cells = [];
+    for (const row of this.matrix) {
+      for (const cell of row) {
+        cells.push(cell);
+      }
+    }
+    return cells;
   }
 
   private checkRow(row: number): Set<SudokuCell> {
@@ -119,12 +153,24 @@ export class Sudoku {
     col: number,
     cell: HTMLElement
   ) => {
-    cell.addEventListener('click', () => {
+    cell.addEventListener('focus', () => {
       this.setActiveCell(row, col);
     });
-    /* cell.addEventListener('blur', () => {
-      this.dropActiveCell();
-    }); */
+    cell.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        this.dropActiveCell();
+      }
+
+      if (['Backspace', 'Delete', 'x' /*, 'd'*/].includes(event.key)) {
+        this.dropActiveCell();
+      }
+
+      const val = parseInt(event.key);
+      if (isSudokuValue(val)) {
+        this.setActiveCellValue(val);
+        this.checkWin();
+      }
+    });
   };
 
   private addKeyPressListeners = () => {
@@ -132,6 +178,10 @@ export class Sudoku {
       // Non-cell keypresses.
       if (event.key === 'Enter') {
         console.log('TODO: Enter?');
+      }
+
+      if (event.key === 'c') {
+        this.validateCells();
       }
 
       if (this.activeCell === null) {
@@ -150,9 +200,33 @@ export class Sudoku {
       const val = parseInt(event.key);
       if (isSudokuValue(val)) {
         this.setActiveCellValue(val);
+        this.checkWin();
       }
     });
   };
+
+
+  private validateCells() {
+    const invalidCells = this.invalidCells();
+    for (const cell of this.getCells()) {
+      cell.isCorrect = !invalidCells.has(cell);
+    }
+  }
+
+
+
+  private checkWin() {
+    let cellCount = 0;
+    for (const cell of this.getCells()) {
+      if (!cell.val) {
+        return false;
+      }
+    }
+    for (const _ of this.invalidCells().values()) {
+      cellCount++;
+    }
+    return cellCount === 0;
+  }
 
   private static createMatrix(DOMMatrix: HTMLElement[][]): SudokuCell[][] {
     const matrix: SudokuCell[][] = [];

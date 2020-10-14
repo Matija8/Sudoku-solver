@@ -84,8 +84,14 @@
     border-bottom: 0.1em solid black;
 }
 
+.sudoku-cell.invalid-cell.readonly-cell {
+    color: black;
+    background-color: lightcoral;
+}
+
 .sudoku-cell.invalid-cell {
     color: red;
+    background-color: lightcoral;
 }
 
 .active-cell {

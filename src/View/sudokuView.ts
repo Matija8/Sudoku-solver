@@ -5,6 +5,8 @@ import { SudokuCell } from "../Model/sudokuCell";
 export const createDOM = function createSudokuDOMView(): {
   DOMmatrix: HTMLElement[][],
   sudokuDOM: HTMLElement,
+  checkBtn: HTMLButtonElement,
+  [key: string]: any, // For dev purposes only!
 } {
   const DOMmatrix: HTMLElement[][] = [];
 
@@ -61,7 +63,7 @@ export const createDOM = function createSudokuDOMView(): {
   sudokuDOM.appendChild(solveBtn);
   // Solve-area-end.
 
-  return { DOMmatrix, sudokuDOM };
+  return { DOMmatrix, sudokuDOM, checkBtn };
 }
 
 

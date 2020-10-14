@@ -44,7 +44,7 @@ export class SudokuCell {
       return;
     }
     this._isCorrect = correct;
-    if (correct) {
+    if (!correct) {
       this._DOMElement.classList.add('invalid-cell');
     } else {
       this._DOMElement.classList.remove('invalid-cell');
