@@ -4,8 +4,12 @@
   "description": "A fun game of sudoku!",
   "scripts": {
     "build": "tsc",
+    "buildnrun": "tsc; parcel index.html",
     "watch-ts": "tsc -w",
-    "start": "parcel index.html"
+    "t": "tsc -w",
+    "start": "parcel index.html",
+    "s": "parcel index.html",
+    "clean": "sh clean.sh"
   },
   "main": "build/main.js",
   "repository": "git@github.com:Matija8/Sudoku-solver.git",

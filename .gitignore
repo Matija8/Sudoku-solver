@@ -7,3 +7,4 @@ yarn-error.log
 /.cache
 # Prevent dependabot alerts
 yarn.lock
+package-lock.json

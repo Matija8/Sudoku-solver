@@ -6,11 +6,6 @@ export const isSudokuValue = function isValidSudokuCellValue(
   return [null, 1, 2, 3, 4, 5, 6, 7, 8, 9].includes(n);
 };
 
-export interface CellCoords {
-  row: number;
-  col: number;
-}
-
 export class SudokuCell {
   private _val: SudokuCellValue;
   private _isCorrect: boolean;
