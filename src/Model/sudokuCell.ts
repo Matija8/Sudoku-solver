@@ -1,3 +1,5 @@
+import { CellView } from '../View/CellView';
+
 export type SudokuCellValue = null | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
 export const isSudokuValue = function isValidSudokuCellValue(
@@ -11,7 +13,7 @@ export class SudokuCell {
   private _isCorrect: boolean;
   private _readOnly: boolean;
   private _DOMElement: HTMLElement;
-  private _isActive: boolean;
+  private _view: CellView;
 
   constructor({
     readOnly = false,
@@ -27,7 +29,7 @@ export class SudokuCell {
     this._readOnly = readOnly;
     console.assert(!!DOMElement, 'DOM element falsy!');
     this._DOMElement = DOMElement;
-    this._isActive = false;
+    this._view = new CellView(DOMElement);
   }
 
   public get isCorrect(): boolean {
@@ -35,27 +37,8 @@ export class SudokuCell {
   }
 
   public set isCorrect(correct: boolean) {
-    if (correct === this._isCorrect) {
-      return;
-    }
     this._isCorrect = correct;
-    if (!correct) {
-      this._DOMElement.classList.add('invalid-cell');
-    } else {
-      this._DOMElement.classList.remove('invalid-cell');
-    }
-  }
-
-  public set isActive(active: boolean) {
-    if (active === this._isActive) {
-      return;
-    }
-    this._isActive = active;
-    if (active) {
-      this._DOMElement.classList.add('active-cell');
-    } else {
-      this._DOMElement.classList.remove('active-cell');
-    }
+    this._view.isCorrect = correct;
   }
 
   public get val() {
@@ -63,7 +46,7 @@ export class SudokuCell {
   }
 
   public set val(newVal: SudokuCellValue) {
-    if (newVal === this._val) {
+    if (newVal === this._val || this._readOnly) {
       return;
     }
     this._val = newVal;

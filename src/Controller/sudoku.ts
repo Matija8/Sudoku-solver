@@ -8,15 +8,15 @@ import { createDOM } from '../View/sudokuView';
 export class Sudoku {
   private matrix: SudokuCell[][];
   private _activeCell: SudokuCell | null;
-  private sudokuDOM: HTMLElement;
 
   constructor(root: HTMLElement) {
     this._activeCell = null;
 
     const { DOMmatrix, sudokuDOM, checkBtn } = createDOM();
     this.matrix = Sudoku.createMatrix(DOMmatrix);
-    this.sudokuDOM = sudokuDOM;
     root.appendChild(sudokuDOM);
+    // TODO: Added removing from root!?
+    // TODO: Add new game/clear.
 
     for (let row = 0; row < 9; row++) {
       for (let col = 0; col < 9; col++) {
@@ -26,16 +26,20 @@ export class Sudoku {
 
     // TODO: remove listeners on close.
     const clickCheckBtn = () => {
-      console.log('check!');
       this.updateCellValidityView();
     };
     checkBtn.addEventListener('click', clickCheckBtn);
 
     this.addGlobalKeyPressListeners();
+  }
 
-    sudokuDOM.addEventListener('blur', () => {
-      this.dropActiveCell();
-    });
+  public get matrixValue() {
+    // Return copy of the sudoku matrix.
+    const newMatrix = [];
+    for (let i = 0; i < this.matrix.length; i++) {
+      newMatrix[i] = this.matrix[i].map((cell) => cell.val);
+    }
+    return newMatrix;
   }
 
   // * Setup methods *
@@ -51,18 +55,18 @@ export class Sudoku {
     return matrix;
   }
 
-  // * Cell getter methods *
+  // * View *
 
-  public get matrixValue() {
-    // Return copy of the sudoku matrix.
-    const newMatrix = [];
-    for (let i = 0; i < this.matrix.length; i++) {
-      newMatrix[i] = this.matrix[i].map((cell) => cell.val);
+  private updateCellValidityView() {
+    const invalidCells = this.getInvalidCells();
+    for (const cell of this.getAllCells()) {
+      cell.isCorrect = !invalidCells.has(cell);
     }
-    return newMatrix;
   }
 
-  private getCell(row: number, col: number): SudokuCell {
+  // * Cell getter methods *
+
+  private getCellByRowCol(row: number, col: number): SudokuCell {
     return this.matrix[row][col];
   }
 
@@ -86,17 +90,11 @@ export class Sudoku {
     if (this._activeCell === newActiveCell) {
       return;
     }
-    if (this._activeCell) {
-      this._activeCell.isActive = false;
-    }
-    if (newActiveCell) {
-      newActiveCell.isActive = true;
-    }
     this._activeCell = newActiveCell;
   }
 
   private setActiveCellByRowCol(row: number, col: number): void {
-    const newActiveCell = this.getCell(row, col);
+    const newActiveCell = this.getCellByRowCol(row, col);
     if (!newActiveCell) {
       return;
     }
@@ -112,6 +110,70 @@ export class Sudoku {
       return;
     }
     this.activeCell.val = val;
+  }
+
+  // * Listener adding methods *
+
+  private addEventListenersToCell = (
+    row: number,
+    col: number,
+    cell: HTMLElement
+  ) => {
+    cell.addEventListener('focus', () => {
+      this.setActiveCellByRowCol(row, col);
+    });
+    cell.addEventListener('blur', () => {
+      this.dropActiveCell();
+    });
+  };
+
+  private addGlobalKeyPressListeners = (): void => {
+    document.addEventListener('keydown', (event) => {
+      // Non-cell keypresses.
+      if (event.key === 'c') {
+        this.updateCellValidityView();
+      }
+
+      // Cell keypresses.
+      if (this.activeCell === null) {
+        return;
+      }
+
+      if (event.key === 'Escape') {
+        this.dropActiveCell();
+      }
+
+      if (['Backspace', 'Delete', 'x', 'd'].includes(event.key)) {
+        this.setActiveCellValue(null);
+      }
+
+      const val = parseInt(event.key);
+      if (isSudokuValue(val)) {
+        this.setActiveCellValue(val);
+        if (this.checkWin()) {
+          // TODO: Do something on victory!
+        }
+      }
+    });
+  };
+
+  // * Win condition *
+
+  private checkWin(): boolean {
+    if (!this.checkIfAllCellsAreFilled()) {
+      return false;
+    }
+
+    return this.getInvalidCells().size === 0;
+  }
+
+  private checkIfAllCellsAreFilled(): boolean {
+    for (const cell of this.getAllCells()) {
+      if (cell.val === null) {
+        return false;
+      }
+    }
+    return true;
   }
 
   // * Cell validity methods *
@@ -185,78 +247,5 @@ export class Sudoku {
       }
     }
     return invalidCells;
-  }
-
-  // * Listener adding methods *
-
-  private addEventListenersToCell = (
-    row: number,
-    col: number,
-    cell: HTMLElement
-  ) => {
-    cell.addEventListener('focus', () => {
-      this.setActiveCellByRowCol(row, col);
-    });
-  };
-
-  private addGlobalKeyPressListeners = (): void => {
-    document.addEventListener('keydown', (event) => {
-      // Non-cell keypresses.
-      if (event.key === 'Enter') {
-        console.log('TODO: Enter?');
-      }
-
-      if (event.key === 'c') {
-        this.updateCellValidityView();
-      }
-
-      if (this.activeCell === null) {
-        return;
-      }
-
-      // Cell keypresses.
-      if (event.key === 'Escape') {
-        this.dropActiveCell();
-      }
-
-      if (['Backspace', 'Delete', 'x' , 'd'].includes(event.key)) {
-        this.setActiveCellValue(null);
-      }
-
-      const val = parseInt(event.key);
-      if (isSudokuValue(val)) {
-        this.setActiveCellValue(val);
-        this.checkWin();
-      }
-    });
-  };
-
-  // * Win condition *
-
-  private checkWin() {
-    let cellCount = 0;
-    if (!this.checkIfAllCellsAreFilled()) {
-      return false;
-    }
-
-    return this.getInvalidCells().size === 0;
-  }
-
-  private checkIfAllCellsAreFilled(): boolean {
-    for (const cell of this.getAllCells()) {
-      if (cell.val === null) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  // * View *
-
-  private updateCellValidityView() {
-    const invalidCells = this.getInvalidCells();
-    for (const cell of this.getAllCells()) {
-      cell.isCorrect = !invalidCells.has(cell);
-    }
   }
 }

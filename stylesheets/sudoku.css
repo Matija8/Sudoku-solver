@@ -14,6 +14,7 @@
     border-radius: 0.5rem;
     font-size: 1.6rem;
     padding: .5rem 1rem;
+    margin-bottom: 2rem;
     transition: all .1s linear;
     outline: none;
 }
@@ -94,10 +95,12 @@
     background-color: lightcoral;
 }
 
-.active-cell {
+.sudoku-cell:focus{
     background-color: var(--active-cell-color);
 }
 
+/*
+TODO: Make active row and column colored.
 .active-row-cell:not(.active-cell) {
     background-color: var(--active-cell-color);
-}
+} */
