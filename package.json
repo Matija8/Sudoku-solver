@@ -6,11 +6,10 @@
     "start": "parcel index.html",
     "check": "tsc --noEmit",
     "clean": "sh clean.sh",
-    "build": "parcel build index.html",
-    "predeploy": "npm run build",
+    "gh-build": "parcel build index.html --public-url https://Matija8.github.io/Sudoku-solver",
+    "predeploy": "npm run gh-build",
     "deploy": "gh-pages -d dist"
   },
-  "homepage": "http://Matija8.github.io/Sudoku-solver",
   "repository": "git@github.com:Matija8/Sudoku-solver.git",
   "author": "Matija8 <matijanme@gmail.com>",
   "license": "MIT",
