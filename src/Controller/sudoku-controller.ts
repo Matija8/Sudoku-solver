@@ -1,16 +1,15 @@
-import {
-  SudokuCellValue,
-  isSudokuValue,
-  SudokuCell,
-} from '../Model/sudokuCell';
+import { isSudokuValue, SudokuCell } from '../Model/sudokuCell';
 import { createDOM } from '../View/sudokuView';
+import { CellValidator } from './cell-validator';
 
 export class Sudoku {
   private matrix: SudokuCell[][];
+  private cellValidator: CellValidator;
 
   constructor(root: HTMLElement) {
     const { DOMmatrix, sudokuDOM, checkBtn } = createDOM();
     this.matrix = Sudoku.createMatrix(DOMmatrix);
+    this.cellValidator = new CellValidator(this.matrix);
     root.appendChild(sudokuDOM);
     // TODO: Added removing from root!?
     // TODO: Add new game/clear.
@@ -31,15 +30,12 @@ export class Sudoku {
   }
 
   public get matrixValue() {
-    // Return copy of the sudoku matrix.
-    const newMatrix = [];
+    const matrixValues = [];
     for (let i = 0; i < this.matrix.length; i++) {
-      newMatrix[i] = this.matrix[i].map((cell) => cell.val);
+      matrixValues[i] = this.matrix[i].map((cell) => cell.val);
     }
-    return newMatrix;
+    return matrixValues;
   }
-
-  // * Setup methods *
 
   private static createMatrix(DOMMatrix: HTMLElement[][]): SudokuCell[][] {
     const matrix: SudokuCell[][] = [];
@@ -52,8 +48,6 @@ export class Sudoku {
     return matrix;
   }
 
-  // * View *
-
   private updateCellValidityView() {
     const invalidCells = this.getInvalidCells();
     for (const cell of this.getAllCells()) {
@@ -61,7 +55,11 @@ export class Sudoku {
     }
   }
 
-  // * Cell getter methods *
+  private clearCellValidityView() {
+    this.getAllCells().forEach((cell) => {
+      cell.isCorrect = true;
+    });
+  }
 
   private getCellByRowCol(row: number, col: number): SudokuCell {
     return this.matrix[row][col];
@@ -77,8 +75,6 @@ export class Sudoku {
     return cells;
   }
 
-  // * Listener adding methods *
-
   private addEventListenersToCell = (
     row: number,
     col: number,
@@ -92,13 +88,11 @@ export class Sudoku {
       const val = Number(event.key);
       const isValidNumber = val !== NaN && 1 <= val && val <= 9;
       if (isValidNumber) {
-        setDOMValue(String(val));
-        this.trySetCellValue(cell, val);
+        this.trySetCellValue(cell, val) && setDOMValue(String(val));
         return;
       }
-      console.log(event.key);
       if (['Backspace', 'Delete', 'x'].includes(event.key)) {
-        setDOMValue('');
+        this.trySetCellValue(cell, null) && setDOMValue('');
       }
     });
   };
@@ -112,95 +106,27 @@ export class Sudoku {
   };
 
   private trySetCellValue(cell: SudokuCell, val: any) {
+    this.clearCellValidityView();
     if (isSudokuValue(val)) {
       cell.val = val;
       if (this.checkWin()) {
         // TODO: Do something on victory!
+        alert('Yo win!');
       }
+      return true;
     }
+    return false;
   }
 
-  // * Win condition *
-
   private checkWin(): boolean {
-    if (!this.checkIfAllCellsAreFilled()) {
-      return false;
-    }
-
-    return this.getInvalidCells().size === 0;
+    return this.checkIfAllCellsAreFilled() && this.getInvalidCells().size === 0;
   }
 
   private checkIfAllCellsAreFilled(): boolean {
     return this.getAllCells().every((cell) => cell.val !== null);
   }
 
-  // * Cell validity methods *
-
-  private getInvalidCells(): Set<SudokuCell> {
-    const invalidCells = new Set<SudokuCell>();
-    for (let i = 0; i < 9; i++) {
-      for (const cell of this.getInvalidCellsFromRow(i)) {
-        invalidCells.add(cell);
-      }
-      for (const cell of this.getInvalidCellsFromCol(i)) {
-        invalidCells.add(cell);
-      }
-    }
-    for (let i = 0; i < 3; i++) {
-      for (let j = 0; j < 3; j++) {
-        for (const cell of this.getInvalidCellsFromSquare(i, j)) {
-          invalidCells.add(cell);
-        }
-      }
-    }
-    return invalidCells;
-  }
-
-  private getInvalidCellsFromRow(row: number): Set<SudokuCell> {
-    console.assert(0 <= row && row < 9, 'Row number is invalid.');
-    return Sudoku.invalidCellsFromArray(this.matrix[row]);
-  }
-
-  private getInvalidCellsFromCol(col: number): Set<SudokuCell> {
-    console.assert(0 <= col && col < 9, 'Col number is invalid.');
-    const cells = [];
-    for (let row = 0; row < 9; row++) {
-      cells.push(this.matrix[row][col]);
-    }
-    return Sudoku.invalidCellsFromArray(cells);
-  }
-
-  private getInvalidCellsFromSquare(xAxis: number, yAxis: number) {
-    const cells = [];
-    for (let row = 0 + 3 * yAxis; row < 3 + 3 * yAxis; row++) {
-      for (let col = 0 + 3 * xAxis; col < 3 + 3 * xAxis; col++) {
-        cells.push(this.matrix[row][col]);
-      }
-    }
-    return Sudoku.invalidCellsFromArray(cells);
-  }
-
-  private static invalidCellsFromArray(cells: SudokuCell[]): Set<SudokuCell> {
-    const invalidCells = new Set<SudokuCell>();
-    const repeated = new Set<number>();
-    const vals = new Set<number>();
-    for (const val of cells.map((cell) => cell.val)) {
-      if (val === null) {
-        continue;
-      }
-      if (vals.has(val)) {
-        repeated.add(val);
-      }
-      vals.add(val);
-    }
-    for (const cell of cells) {
-      if (cell.val === null) {
-        continue;
-      }
-      if (repeated.has(cell.val)) {
-        invalidCells.add(cell);
-      }
-    }
-    return invalidCells;
+  private getInvalidCells() {
+    return this.cellValidator.getInvalidCells();
   }
 }
