@@ -7,11 +7,8 @@ import { createDOM } from '../View/sudokuView';
 
 export class Sudoku {
   private matrix: SudokuCell[][];
-  private _activeCell: SudokuCell | null;
 
   constructor(root: HTMLElement) {
-    this._activeCell = null;
-
     const { DOMmatrix, sudokuDOM, checkBtn } = createDOM();
     this.matrix = Sudoku.createMatrix(DOMmatrix);
     root.appendChild(sudokuDOM);
@@ -80,38 +77,6 @@ export class Sudoku {
     return cells;
   }
 
-  // * Active cell methods *
-
-  private get activeCell(): SudokuCell | null {
-    return this._activeCell;
-  }
-
-  private set activeCell(newActiveCell: SudokuCell | null) {
-    if (this._activeCell === newActiveCell) {
-      return;
-    }
-    this._activeCell = newActiveCell;
-  }
-
-  private setActiveCellByRowCol(row: number, col: number): void {
-    const newActiveCell = this.getCellByRowCol(row, col);
-    if (!newActiveCell) {
-      return;
-    }
-    this.activeCell = newActiveCell;
-  }
-
-  private dropActiveCell(): void {
-    this.activeCell = null;
-  }
-
-  private setActiveCellValue(val: SudokuCellValue) {
-    if (!this.activeCell) {
-      return;
-    }
-    this.activeCell.val = val;
-  }
-
   // * Listener adding methods *
 
   private addEventListenersToCell = (
@@ -119,43 +84,41 @@ export class Sudoku {
     col: number,
     cell: HTMLElement
   ) => {
-    cell.addEventListener('focus', () => {
-      this.setActiveCellByRowCol(row, col);
-    });
-    cell.addEventListener('blur', () => {
-      this.dropActiveCell();
+    cell.addEventListener('keydown', (event: KeyboardEvent) => {
+      event.preventDefault();
+      const setDOMValue = (newVal: string) =>
+        ((event.target as any).value = newVal);
+      const cell = this.getCellByRowCol(row, col);
+      const val = Number(event.key);
+      const isValidNumber = val !== NaN && 1 <= val && val <= 9;
+      if (isValidNumber) {
+        setDOMValue(String(val));
+        this.trySetCellValue(cell, val);
+        return;
+      }
+      console.log(event.key);
+      if (['Backspace', 'Delete', 'x'].includes(event.key)) {
+        setDOMValue('');
+      }
     });
   };
 
   private addGlobalKeyPressListeners = (): void => {
     document.addEventListener('keydown', (event) => {
-      // Non-cell keypresses.
       if (event.key === 'c') {
         this.updateCellValidityView();
       }
-
-      // Cell keypresses.
-      if (this.activeCell === null) {
-        return;
-      }
-
-      if (event.key === 'Escape') {
-        this.dropActiveCell();
-      }
-
-      if (['Backspace', 'Delete', 'x', 'd'].includes(event.key)) {
-        this.setActiveCellValue(null);
-      }
-
-      const val = parseInt(event.key);
-      if (isSudokuValue(val)) {
-        this.setActiveCellValue(val);
-        if (this.checkWin()) {
-          // TODO: Do something on victory!
-        }
-      }
     });
   };
+
+  private trySetCellValue(cell: SudokuCell, val: any) {
+    if (isSudokuValue(val)) {
+      cell.val = val;
+      if (this.checkWin()) {
+        // TODO: Do something on victory!
+      }
+    }
+  }
 
   // * Win condition *
 
@@ -168,12 +131,7 @@ export class Sudoku {
   }
 
   private checkIfAllCellsAreFilled(): boolean {
-    for (const cell of this.getAllCells()) {
-      if (cell.val === null) {
-        return false;
-      }
-    }
-    return true;
+    return this.getAllCells().every((cell) => cell.val !== null);
   }
 
   // * Cell validity methods *
@@ -199,13 +157,11 @@ export class Sudoku {
   }
 
   private getInvalidCellsFromRow(row: number): Set<SudokuCell> {
-    // Return invalid cells in row {row}.
     console.assert(0 <= row && row < 9, 'Row number is invalid.');
     return Sudoku.invalidCellsFromArray(this.matrix[row]);
   }
 
   private getInvalidCellsFromCol(col: number): Set<SudokuCell> {
-    // Return invalid cells in col {col}.
     console.assert(0 <= col && col < 9, 'Col number is invalid.');
     const cells = [];
     for (let row = 0; row < 9; row++) {
@@ -215,7 +171,6 @@ export class Sudoku {
   }
 
   private getInvalidCellsFromSquare(xAxis: number, yAxis: number) {
-    // xAxis/yAxis -> 0 | 1 | 2;
     const cells = [];
     for (let row = 0 + 3 * yAxis; row < 3 + 3 * yAxis; row++) {
       for (let col = 0 + 3 * xAxis; col < 3 + 3 * xAxis; col++) {

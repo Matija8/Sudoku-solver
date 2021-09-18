@@ -41,7 +41,10 @@ const makeTable = () => {
 };
 
 const makeSudokuCell = function makeSudokuCellDOMElement(i: number, j: number) {
-  const sudokuCell = document.createElement('div');
+  const sudokuCell = document.createElement('input');
+  sudokuCell.type = 'number';
+  sudokuCell.maxLength = 1;
+  sudokuCell.style.caretColor = 'transparent';
   sudokuCell.classList.add('sudoku-cell');
   addCellBorder(sudokuCell, i, j);
   sudokuCell.setAttribute('tabindex', '-1');
