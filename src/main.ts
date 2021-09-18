@@ -1,4 +1,4 @@
-import { Sudoku } from './Controller/sudoku-controller';
+import { SudokuController } from './Controller/sudoku-controller';
 
 const main = function appendSudokuGameToRoot(rootId = 'root') {
   const root = document.getElementById(rootId);
@@ -6,7 +6,7 @@ const main = function appendSudokuGameToRoot(rootId = 'root') {
     console.error(`Couldn't get the root element for the sudoku board.`);
     return;
   }
-  const sudoku = new Sudoku(root);
+  const sudoku = new SudokuController(root);
   document.addEventListener('keypress', (event) => {
     if (event.key === 't') {
       console.table(sudoku.matrixValue);

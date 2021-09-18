@@ -1,14 +1,18 @@
-import { isSudokuValue, SudokuCell } from '../Model/sudokuCell';
+import {
+  isSudokuValue,
+  SudokuCell,
+  SudokuCellValue,
+} from '../Model/sudokuCell';
 import { createDOM } from '../View/sudokuView';
 import { CellValidator } from './cell-validator';
 
-export class Sudoku {
+export class SudokuController {
   private matrix: SudokuCell[][];
   private cellValidator: CellValidator;
 
   constructor(root: HTMLElement) {
     const { DOMmatrix, sudokuDOM, checkBtn } = createDOM();
-    this.matrix = Sudoku.createMatrix(DOMmatrix);
+    this.matrix = SudokuController.createMatrix(DOMmatrix);
     this.cellValidator = new CellValidator(this.matrix);
     root.appendChild(sudokuDOM);
     // TODO: Added removing from root!?
@@ -35,6 +39,23 @@ export class Sudoku {
       matrixValues[i] = this.matrix[i].map((cell) => cell.val);
     }
     return matrixValues;
+  }
+
+  public set matrixValue(newMatrix: SudokuCellValue[][]) {
+    // TODO: Get from api.
+    const isValidMatrix = (matrix: SudokuCellValue[][]) =>
+      matrix.length === 9 && matrix.every((row) => row.length === 9);
+
+    if (!isValidMatrix(newMatrix)) {
+      console.error('Bad newMatrix!', newMatrix);
+      return;
+    }
+
+    for (let row = 0; row < 9; row++) {
+      for (let col = 0; col < 9; col++) {
+        this.matrix[row][col].val = newMatrix[row][col];
+      }
+    }
   }
 
   private static createMatrix(DOMMatrix: HTMLElement[][]): SudokuCell[][] {
