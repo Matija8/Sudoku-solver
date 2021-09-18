@@ -462,7 +462,7 @@ const main = function appendSudokuGameToRoot(rootId = 'root') {
         console.error(`Couldn't get the root element for the sudoku board.`);
         return;
     }
-    const sudoku = new _sudokuController.Sudoku(root);
+    const sudoku = new _sudokuController.SudokuController(root);
     document.addEventListener('keypress', (event)=>{
         if (event.key === 't') console.table(sudoku.matrixValue);
     });
@@ -472,12 +472,12 @@ main();
 },{"./Controller/sudoku-controller":"h7E3s"}],"h7E3s":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "Sudoku", ()=>Sudoku
+parcelHelpers.export(exports, "SudokuController", ()=>SudokuController
 );
 var _sudokuCell = require("../Model/sudokuCell");
 var _sudokuView = require("../View/sudokuView");
 var _cellValidator = require("./cell-validator");
-class Sudoku {
+class SudokuController {
     constructor(root){
         this.addEventListenersToCell = (row, col, cell)=>{
             cell.addEventListener('keydown', (event)=>{
@@ -504,7 +504,7 @@ class Sudoku {
             });
         };
         const { DOMmatrix , sudokuDOM , checkBtn  } = _sudokuView.createDOM();
-        this.matrix = Sudoku.createMatrix(DOMmatrix);
+        this.matrix = SudokuController.createMatrix(DOMmatrix);
         this.cellValidator = new _cellValidator.CellValidator(this.matrix);
         root.appendChild(sudokuDOM);
         // TODO: Added removing from root!?
@@ -522,6 +522,16 @@ class Sudoku {
         for(let i = 0; i < this.matrix.length; i++)matrixValues[i] = this.matrix[i].map((cell)=>cell.val
         );
         return matrixValues;
+    }
+    set matrixValue(newMatrix) {
+        const isValidMatrix = (matrix)=>matrix.length === 9 && matrix.every((row1)=>row1.length === 9
+            )
+        ;
+        if (!isValidMatrix(newMatrix)) {
+            console.error('Bad newMatrix!', newMatrix);
+            return;
+        }
+        for(let row1 = 0; row1 < 9; row1++)for(let col1 = 0; col1 < 9; col1++)this.matrix[row1][col1].val = newMatrix[row1][col1];
     }
     static createMatrix(DOMMatrix) {
         const matrix = [];
