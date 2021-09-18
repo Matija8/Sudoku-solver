@@ -1,0 +1,120 @@
+:root {
+  --cell-hover-color: lightblue;
+  /* Mica was here */
+  --color-primary: lightblue;
+  --active-cell-color: rgb(125, 205, 230);
+  --active-row-color: rgb(200, 225, 230);
+  font-size: 10px;
+}
+
+.button {
+  border: none;
+  font-weight: 700;
+  border-radius: 0.5rem;
+  font-size: 1.6rem;
+  padding: 0.5rem 1rem;
+  margin-bottom: 2rem;
+  transition: all 0.1s linear;
+  outline: none;
+}
+
+.button:active {
+  box-shadow: none;
+  transform: translateY(6px);
+}
+
+.button-primary {
+  background-color: var(--color-primary);
+  color: darkblue;
+  box-shadow: 0 6px 0 darkblue;
+}
+.button-danger {
+  color: darkred;
+  background-color: lightcoral;
+  box-shadow: 0 6px 0 darkred;
+}
+
+.sudoku-DOM {
+  margin: auto;
+  /* TODO */
+  width: 40rem;
+  /* padding: 40px; */
+}
+
+.sudoku-table {
+  display: table;
+  margin: auto;
+  margin-bottom: 20px;
+  border: 0.1em solid black;
+}
+
+.sudoku-row {
+  display: table-row;
+}
+
+.sudoku-cell {
+  font-size: 2rem;
+  display: table-cell;
+  border-left: 0.05em solid gray;
+  border-top: 0.05em solid gray;
+  padding: 0.3rem;
+  margin: auto;
+  width: 3rem;
+  height: 3rem;
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.sudoku-cell:hover:not(.active-cell) {
+  background-color: var(--cell-hover-color);
+}
+
+.sudoku-cell.strong-border-left {
+  border-left: 0.1em solid black;
+}
+.sudoku-cell.strong-border-right {
+  border-right: 0.1em solid black;
+}
+.sudoku-cell.strong-border-above {
+  border-top: 0.1em solid black;
+}
+.sudoku-cell.strong-border-below {
+  border-bottom: 0.1em solid black;
+}
+
+.sudoku-cell.invalid-cell.readonly-cell {
+  color: black;
+  background-color: lightcoral;
+}
+
+.sudoku-cell.invalid-cell {
+  color: red;
+  background-color: lightcoral;
+}
+
+.sudoku-cell:focus {
+  background-color: var(--active-cell-color);
+}
+
+/* Hide arrows on number input elements */
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+/*
+TODO: Make active row and column colored.
+.active-row-cell:not(.active-cell) {
+    background-color: var(--active-cell-color);
+} */
+
+/*# sourceMappingURL=index.a5acbcd1.css.map */
