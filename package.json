@@ -3,23 +3,19 @@
   "version": "1.0.0",
   "description": "A fun game of sudoku!",
   "scripts": {
-    "build": "tsc",
-    "buildnrun": "tsc; parcel index.html",
-    "watch-ts": "tsc -w",
-    "t": "tsc -w",
     "start": "parcel index.html",
-    "s": "parcel index.html",
-    "clean": "sh clean.sh"
+    "check": "tsc --noEmit",
+    "clean": "sh clean.sh",
+    "build": "parcel build index.html",
+    "predeploy": "npm run build"
   },
-  "main": "build/main.js",
   "repository": "git@github.com:Matija8/Sudoku-solver.git",
   "author": "Matija8 <matijanme@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "parcel": "^1.12.4",
-    "typescript": "^4.0.3"
+    "parcel": "^2.0.0-rc.0"
   },
   "devDependencies": {
-    "tslint": "^6.1.3"
+    "tsc": "^2.0.3"
   }
 }
