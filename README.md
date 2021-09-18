@@ -2,6 +2,10 @@
 
 A Typescript based sudoku solver.
 
+## :video_game: To run online version
+
+[Sudoku solver](https://matija8.github.io/Sudoku-solver/)
+
 ## To run locally
 
 ( `$` represents your shell prompt )
